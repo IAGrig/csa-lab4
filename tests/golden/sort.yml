@@ -1,0 +1,1280 @@
+in_source: |-
+  (defun read-loop ()
+    (setq c (read-char 1))
+    (store-byte c (+ buf i))
+    (setq i (+ i 1))
+    (if (= c 0)
+        0
+        (read-loop)))
+
+  (defun write-loop ()
+    (setq c (load-byte (+ buf i)))
+    (if (= c 0)
+      0
+      (progn
+        (write-char c 1)
+        (setq i (+ i 1))
+        (write-loop))))
+
+  (defun inner (ii ij imin)
+    (if (= ij n)
+      imin
+      (progn
+        (setq b1 (load-byte (+ buf ij)))
+        (setq b2 (load-byte (+ buf imin)))
+        (inner ii
+          (+ ij 1)
+          (if (< b1 b2) ij imin)))))
+
+  (defun outer (i)
+    (if (>= i (- n 1))
+      0
+      (progn
+        (setq min (inner i (+ i 1) i))
+        (setq tmp (load-byte (+ buf i)))
+        (store-byte (load-byte (+ buf min)) (+ buf i))
+        (store-byte tmp (+ buf min))
+        (outer (+ i 1)))))
+
+  (defun sort-bytes (address length)
+    (setq buf address)
+    (setq n length)
+    (setq i 0)
+    (outer 0)
+    n)
+
+  (setq buf (allocate 30))
+  (setq i 0)
+  (read-loop)
+  (setq n (- i 1))
+  (sort-bytes buf n)
+  (setq i 0)
+  (write-loop)
+in_stdin: (40, 'T'), (120, 'A'), (200, 'S'), (280, 0)
+tick_limit: 100000
+log_limit: 1000
+out_code_hex: |
+  0000 - 0x08000001 - jump("__main_start") 1
+  0001 - 0x38000000 - pushaddr("l0_buf") 0
+  0002 - 0x98000000 - dup
+  0003 - 0x30000021 - store("buf_var") 33
+  0004 - 0xA0000000 - drop
+  0005 - 0x38000000 - pushnum(0) 0
+  0006 - 0x98000000 - dup
+  0007 - 0x30000023 - store("i_var") 35
+  0008 - 0xA0000000 - drop
+  0009 - 0x1000001A - call("read-loop") 26
+  0010 - 0xA0000000 - drop
+  0011 - 0x38000001 - pushnum(1) 1
+  0012 - 0x28000023 - load("i_var") 35
+  0013 - 0x54C00000 - sub | dup
+  0014 - 0x30000029 - store("n_var") 41
+  0015 - 0xA0000000 - drop
+  0016 - 0x28000021 - load("buf_var") 33
+  0017 - 0x28000029 - load("n_var") 41
+  0018 - 0x100000B6 - call("sort-bytes") 182
+  0019 - 0xA0000000 - drop
+  0020 - 0x38000000 - pushnum(0) 0
+  0021 - 0x98000000 - dup
+  0022 - 0x30000023 - store("i_var") 35
+  0023 - 0xA0000000 - drop
+  0024 - 0x10000038 - call("write-loop") 56
+  0025 - 0xE8000000 - halt
+  0026 - 0xC0000001 - in(1) 1
+  0027 - 0x98000000 - dup
+  0028 - 0x30000022 - store("c_var") 34
+  0029 - 0xA0000000 - drop
+  0030 - 0x28000022 - load("c_var") 34
+  0031 - 0x98000000 - dup
+  0032 - 0x28000023 - load("i_var") 35
+  0033 - 0x28000021 - load("buf_var") 33
+  0034 - 0x4DA80000 - add | storeindirect | drop
+  0035 - 0x38000001 - pushnum(1) 1
+  0036 - 0x28000023 - load("i_var") 35
+  0037 - 0x4CC00000 - add | dup
+  0038 - 0x30000023 - store("i_var") 35
+  0039 - 0xA0000000 - drop
+  0040 - 0x28000022 - load("c_var") 34
+  0041 - 0x38000000 - pushnum(0) 0
+  0042 - 0x90000000 - xor
+  0043 - 0x1800002F - branchzero("l3_eq_false") 47
+  0044 - 0xA0000000 - drop
+  0045 - 0x38000000 - pushnum(0) 0
+  0046 - 0x08000031 - jump("l4_eq_exit") 49
+  0047 - 0xA0000000 - drop
+  0048 - 0x38000001 - pushnum(1) 1
+  0049 - 0x18000035 - branchzero("l1_else") 53
+  0050 - 0xA0000000 - drop
+  0051 - 0x38000000 - pushnum(0) 0
+  0052 - 0x08000037 - jump("l2_endif") 55
+  0053 - 0xA0000000 - drop
+  0054 - 0x0800001A - jump("read-loop") 26
+  0055 - 0x40000000 - return
+  0056 - 0x28000023 - load("i_var") 35
+  0057 - 0x28000021 - load("buf_var") 33
+  0058 - 0x4D660000 - add | loadindirect | dup
+  0059 - 0x30000022 - store("c_var") 34
+  0060 - 0xA0000000 - drop
+  0061 - 0x28000022 - load("c_var") 34
+  0062 - 0x38000000 - pushnum(0) 0
+  0063 - 0x90000000 - xor
+  0064 - 0x18000044 - branchzero("l7_eq_false") 68
+  0065 - 0xA0000000 - drop
+  0066 - 0x38000000 - pushnum(0) 0
+  0067 - 0x08000046 - jump("l8_eq_exit") 70
+  0068 - 0xA0000000 - drop
+  0069 - 0x38000001 - pushnum(1) 1
+  0070 - 0x1800004A - branchzero("l5_else") 74
+  0071 - 0xA0000000 - drop
+  0072 - 0x38000000 - pushnum(0) 0
+  0073 - 0x08000055 - jump("l6_endif") 85
+  0074 - 0xA0000000 - drop
+  0075 - 0x28000022 - load("c_var") 34
+  0076 - 0x98000000 - dup
+  0077 - 0xB8000001 - out(1) 1
+  0078 - 0xA0000000 - drop
+  0079 - 0x38000001 - pushnum(1) 1
+  0080 - 0x28000023 - load("i_var") 35
+  0081 - 0x4CC00000 - add | dup
+  0082 - 0x30000023 - store("i_var") 35
+  0083 - 0xA0000000 - drop
+  0084 - 0x08000038 - jump("write-loop") 56
+  0085 - 0x40000000 - return
+  0086 - 0x30000026 - store("imin_var") 38
+  0087 - 0x30000025 - store("ij_var") 37
+  0088 - 0x30000024 - store("ii_var") 36
+  0089 - 0x28000025 - load("ij_var") 37
+  0090 - 0x28000029 - load("n_var") 41
+  0091 - 0x90000000 - xor
+  0092 - 0x18000060 - branchzero("l11_eq_false") 96
+  0093 - 0xA0000000 - drop
+  0094 - 0x38000000 - pushnum(0) 0
+  0095 - 0x08000062 - jump("l12_eq_exit") 98
+  0096 - 0xA0000000 - drop
+  0097 - 0x38000001 - pushnum(1) 1
+  0098 - 0x18000066 - branchzero("l9_else") 102
+  0099 - 0xA0000000 - drop
+  0100 - 0x28000026 - load("imin_var") 38
+  0101 - 0x08000086 - jump("l10_endif") 134
+  0102 - 0xA0000000 - drop
+  0103 - 0x28000025 - load("ij_var") 37
+  0104 - 0x28000021 - load("buf_var") 33
+  0105 - 0x4D660000 - add | loadindirect | dup
+  0106 - 0x3000001F - store("b1_var") 31
+  0107 - 0xA0000000 - drop
+  0108 - 0x28000026 - load("imin_var") 38
+  0109 - 0x28000021 - load("buf_var") 33
+  0110 - 0x4D660000 - add | loadindirect | dup
+  0111 - 0x30000020 - store("b2_var") 32
+  0112 - 0xA0000000 - drop
+  0113 - 0x28000024 - load("ii_var") 36
+  0114 - 0x38000001 - pushnum(1) 1
+  0115 - 0x28000025 - load("ij_var") 37
+  0116 - 0x48000000 - add
+  0117 - 0x2800001F - load("b1_var") 31
+  0118 - 0x28000020 - load("b2_var") 32
+  0119 - 0x54000000 - sub | neg
+  0120 - 0x2000007D - branchpositive("l15_lt_false") 125
+  0121 - 0x1800007D - branchzero("l15_lt_false") 125
+  0122 - 0xA0000000 - drop
+  0123 - 0x38000001 - pushnum(1) 1
+  0124 - 0x0800007F - jump("l16_lt_exit") 127
+  0125 - 0xA0000000 - drop
+  0126 - 0x38000000 - pushnum(0) 0
+  0127 - 0x18000083 - branchzero("l13_else") 131
+  0128 - 0xA0000000 - drop
+  0129 - 0x28000025 - load("ij_var") 37
+  0130 - 0x08000085 - jump("l14_endif") 133
+  0131 - 0xA0000000 - drop
+  0132 - 0x28000026 - load("imin_var") 38
+  0133 - 0x08000056 - jump("inner") 86
+  0134 - 0x40000000 - return
+  0135 - 0x30000023 - store("i_var") 35
+  0136 - 0x28000023 - load("i_var") 35
+  0137 - 0x38000001 - pushnum(1) 1
+  0138 - 0x28000029 - load("n_var") 41
+  0139 - 0x52A00000 - sub | sub | neg
+  0140 - 0x20000091 - branchpositive("l19_gte_false") 145
+  0141 - 0x18000091 - branchzero("l19_gte_false") 145
+  0142 - 0xA0000000 - drop
+  0143 - 0x38000000 - pushnum(0) 0
+  0144 - 0x08000093 - jump("l20_gte_exit") 147
+  0145 - 0xA0000000 - drop
+  0146 - 0x38000001 - pushnum(1) 1
+  0147 - 0x18000097 - branchzero("l17_else") 151
+  0148 - 0xA0000000 - drop
+  0149 - 0x38000000 - pushnum(0) 0
+  0150 - 0x080000B5 - jump("l18_endif") 181
+  0151 - 0xA0000000 - drop
+  0152 - 0x28000023 - load("i_var") 35
+  0153 - 0x38000001 - pushnum(1) 1
+  0154 - 0x28000023 - load("i_var") 35
+  0155 - 0x48000000 - add
+  0156 - 0x28000023 - load("i_var") 35
+  0157 - 0x10000056 - call("inner") 86
+  0158 - 0x98000000 - dup
+  0159 - 0x30000028 - store("min_var") 40
+  0160 - 0xA0000000 - drop
+  0161 - 0x28000023 - load("i_var") 35
+  0162 - 0x28000021 - load("buf_var") 33
+  0163 - 0x4D660000 - add | loadindirect | dup
+  0164 - 0x3000002A - store("tmp_var") 42
+  0165 - 0xA0000000 - drop
+  0166 - 0x28000028 - load("min_var") 40
+  0167 - 0x28000021 - load("buf_var") 33
+  0168 - 0x4D660000 - add | loadindirect | dup
+  0169 - 0x28000023 - load("i_var") 35
+  0170 - 0x28000021 - load("buf_var") 33
+  0171 - 0x4DA80000 - add | storeindirect | drop
+  0172 - 0x2800002A - load("tmp_var") 42
+  0173 - 0x98000000 - dup
+  0174 - 0x28000028 - load("min_var") 40
+  0175 - 0x28000021 - load("buf_var") 33
+  0176 - 0x4DA80000 - add | storeindirect | drop
+  0177 - 0x38000001 - pushnum(1) 1
+  0178 - 0x28000023 - load("i_var") 35
+  0179 - 0x48000000 - add
+  0180 - 0x08000087 - jump("outer") 135
+  0181 - 0x40000000 - return
+  0182 - 0x30000027 - store("length_var") 39
+  0183 - 0x3000001E - store("address_var") 30
+  0184 - 0x2800001E - load("address_var") 30
+  0185 - 0x98000000 - dup
+  0186 - 0x30000021 - store("buf_var") 33
+  0187 - 0xA0000000 - drop
+  0188 - 0x28000027 - load("length_var") 39
+  0189 - 0x98000000 - dup
+  0190 - 0x30000029 - store("n_var") 41
+  0191 - 0xA0000000 - drop
+  0192 - 0x38000000 - pushnum(0) 0
+  0193 - 0x98000000 - dup
+  0194 - 0x30000023 - store("i_var") 35
+  0195 - 0xA0000000 - drop
+  0196 - 0x38000000 - pushnum(0) 0
+  0197 - 0x10000087 - call("outer") 135
+  0198 - 0xA0000000 - drop
+  0199 - 0x28000029 - load("n_var") 41
+  0200 - 0x40000000 - return
+out_code: "00000000: 0800 0001 3800 0000 9800 0000 3000 0021  ....8.......0..!\n00000010: a000 0000 3800 0000 9800 0000 3000 0023  ....8.......0..#\n00000020: a000 0000 1000 001a a000 0000 3800 0001  ............8...\n00000030: 2800 0023 54c0 0000 3000 0029 a000 0000  (..#T...0..)....\n00000040: 2800 0021 2800 0029 1000 00b6 a000 0000  (..!(..)........\n00000050: 3800 0000 9800 0000 3000 0023 a000 0000  8.......0..#....\n00000060: 1000 0038 e800 0000 c000 0001 9800 0000  ...8............\n00000070: 3000 0022 a000 0000 2800 0022 9800 0000  0..\"....(..\"....\n00000080: 2800 0023 2800 0021 4da8 0000 3800 0001  (..#(..!M...8...\n00000090: 2800 0023 4cc0 0000 3000 0023 a000 0000  (..#L...0..#....\n000000a0: 2800 0022 3800 0000 9000 0000 1800 002f  (..\"8........../\n000000b0: a000 0000 3800 0000 0800 0031 a000 0000  ....8......1....\n000000c0: 3800 0001 1800 0035 a000 0000 3800 0000  8......5....8...\n000000d0: 0800 0037 a000 0000 0800 001a 4000 0000  ...7........@...\n000000e0: 2800 0023 2800 0021 4d66 0000 3000 0022  (..#(..!Mf..0..\"\n000000f0: a000 0000 2800 0022 3800 0000 9000 0000  ....(..\"8.......\n00000100: 1800 0044 a000 0000 3800 0000 0800 0046  ...D....8......F\n00000110: a000 0000 3800 0001 1800 004a a000 0000  ....8......J....\n00000120: 3800 0000 0800 0055 a000 0000 2800 0022  8......U....(..\"\n00000130: 9800 0000 b800 0001 a000 0000 3800 0001  ............8...\n00000140: 2800 0023 4cc0 0000 3000 0023 a000 0000  (..#L...0..#....\n00000150: 0800 0038 4000 0000 3000 0026 3000 0025  ...8@...0..&0..%\n00000160: 3000 0024 2800 0025 2800 0029 9000 0000  0..$(..%(..)....\n00000170: 1800 0060 a000 0000 3800 0000 0800 0062  ...`....8......b\n00000180: a000 0000 3800 0001 1800 0066 a000 0000  ....8......f....\n00000190: 2800 0026 0800 0086 a000 0000 2800 0025  (..&........(..%\n000001a0: 2800 0021 4d66 0000 3000 001f a000 0000  (..!Mf..0.......\n000001b0: 2800 0026 2800 0021 4d66 0000 3000 0020  (..&(..!Mf..0.. \n000001c0: a000 0000 2800 0024 3800 0001 2800 0025  ....(..$8...(..%\n000001d0: 4800 0000 2800 001f 2800 0020 5400 0000  H...(...(.. T...\n000001e0: 2000 007d 1800 007d a000 0000 3800 0001   ..}...}....8...\n000001f0: 0800 007f a000 0000 3800 0000 1800 0083  ........8.......\n00000200: a000 0000 2800 0025 0800 0085 a000 0000  ....(..%........\n00000210: 2800 0026 0800 0056 4000 0000 3000 0023  (..&...V@...0..#\n00000220: 2800 0023 3800 0001 2800 0029 52a0 0000  (..#8...(..)R...\n00000230: 2000 0091 1800 0091 a000 0000 3800 0000   ...........8...\n00000240: 0800 0093 a000 0000 3800 0001 1800 0097  ........8.......\n00000250: a000 0000 3800 0000 0800 00b5 a000 0000  ....8...........\n00000260: 2800 0023 3800 0001 2800 0023 4800 0000  (..#8...(..#H...\n00000270: 2800 0023 1000 0056 9800 0000 3000 0028  (..#...V....0..(\n00000280: a000 0000 2800 0023 2800 0021 4d66 0000  ....(..#(..!Mf..\n00000290: 3000 002a a000 0000 2800 0028 2800 0021  0..*....(..((..!\n000002a0: 4d66 0000 2800 0023 2800 0021 4da8 0000  Mf..(..#(..!M...\n000002b0: 2800 002a 9800 0000 2800 0028 2800 0021  (..*....(..((..!\n000002c0: 4da8 0000 3800 0001 2800 0023 4800 0000  M...8...(..#H...\n000002d0: 0800 0087 4000 0000 3000 0027 3000 001e  ....@...0..'0...\n000002e0: 2800 001e 9800 0000 3000 0021 a000 0000  (.......0..!....\n000002f0: 2800 0027 9800 0000 3000 0029 a000 0000  (..'....0..)....\n00000300: 3800 0000 9800 0000 3000 0023 a000 0000  8.......0..#....\n00000310: 3800 0000 1000 0087 a000 0000 2800 0029  8...........(..)\n00000320: 4000 0000                                @...\n"
+out_data: |
+  00000000: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000020: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000030: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000040: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000050: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000060: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000080: 00                                       .
+result_data: |
+  00000000: 0000 4100 0053 0000 5400 0000 0000 0000  ..A..S..T.......
+  00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000020: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000030: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000040: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+  00000050: 0000 0000 0000 0000 0000 0000 0000 0053  ...............S
+  00000060: 0000 5400 0000 0000 0000 0003 0000 0100  ..T.............
+  00000070: 0003 0000 0200 0003 0000 0200 0003 0000  ................
+  00000080: 54                                       T
+out_log: |-
+  [INFO] 0 PC/SLOT/STEP:0/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:0 IO:0
+  [INFO] 1 PC/SLOT/STEP:0/1/0 EI/EAM:0/0 Idepth:0 JUMP(1) T:0 Dst:[] Rst:[] AR:0 IO:0
+  [INFO] 2 PC/SLOT/STEP:1/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:0 IO:0
+  [INFO] 3 PC/SLOT/STEP:1/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[] AR:0 IO:0
+  [INFO] 4 PC/SLOT/STEP:2/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:0 IO:0
+  [INFO] 5 PC/SLOT/STEP:2/1/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[] AR:0 IO:0
+  [INFO] 6 PC/SLOT/STEP:2/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 7 PC/SLOT/STEP:2/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 8 PC/SLOT/STEP:2/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 9 PC/SLOT/STEP:2/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 10 PC/SLOT/STEP:2/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 11 PC/SLOT/STEP:3/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 12 PC/SLOT/STEP:3/1/0 EI/EAM:0/0 Idepth:0 ST(33) T:0 Dst:[0, 0] Rst:[] AR:0 IO:0
+  [INFO] 13 PC/SLOT/STEP:3/1/1 EI/EAM:0/0 Idepth:0 ST(33) T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 14 PC/SLOT/STEP:4/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 15 PC/SLOT/STEP:4/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 16 PC/SLOT/STEP:4/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 17 PC/SLOT/STEP:4/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 18 PC/SLOT/STEP:4/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 19 PC/SLOT/STEP:4/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 20 PC/SLOT/STEP:4/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 21 PC/SLOT/STEP:5/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 22 PC/SLOT/STEP:5/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 23 PC/SLOT/STEP:6/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 24 PC/SLOT/STEP:6/1/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 25 PC/SLOT/STEP:6/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 26 PC/SLOT/STEP:6/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 27 PC/SLOT/STEP:6/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 28 PC/SLOT/STEP:6/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 29 PC/SLOT/STEP:6/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 30 PC/SLOT/STEP:7/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 31 PC/SLOT/STEP:7/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:0 Dst:[0, 0] Rst:[] AR:33 IO:0
+  [INFO] 32 PC/SLOT/STEP:7/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:0 Dst:[0, 0] Rst:[] AR:35 IO:0
+  [INFO] 33 PC/SLOT/STEP:8/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 34 PC/SLOT/STEP:8/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 35 PC/SLOT/STEP:8/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 36 PC/SLOT/STEP:8/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 37 PC/SLOT/STEP:8/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 38 PC/SLOT/STEP:8/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 39 PC/SLOT/STEP:8/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 40 PC/SLOT/STEP:9/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] IO DEVICE 1 INPUT:84
+  [INFO] 41 PC/SLOT/STEP:9/1/0 EI/EAM:0/0 Idepth:0 CALL(26) T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 42 PC/SLOT/STEP:26/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 43 PC/SLOT/STEP:26/1/0 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 44 PC/SLOT/STEP:26/1/1 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 45 PC/SLOT/STEP:27/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 46 PC/SLOT/STEP:27/1/0 EI/EAM:0/0 Idepth:0 DUP T:84 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 47 PC/SLOT/STEP:27/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 48 PC/SLOT/STEP:27/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 49 PC/SLOT/STEP:27/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 50 PC/SLOT/STEP:27/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 51 PC/SLOT/STEP:27/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 52 PC/SLOT/STEP:28/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 53 PC/SLOT/STEP:28/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 54 PC/SLOT/STEP:28/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 55 PC/SLOT/STEP:29/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 56 PC/SLOT/STEP:29/1/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 57 PC/SLOT/STEP:29/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 58 PC/SLOT/STEP:29/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 59 PC/SLOT/STEP:29/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 60 PC/SLOT/STEP:29/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 61 PC/SLOT/STEP:29/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 62 PC/SLOT/STEP:30/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 63 PC/SLOT/STEP:30/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 64 PC/SLOT/STEP:30/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 65 PC/SLOT/STEP:31/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 66 PC/SLOT/STEP:31/1/0 EI/EAM:0/0 Idepth:0 DUP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 67 PC/SLOT/STEP:31/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 68 PC/SLOT/STEP:31/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 69 PC/SLOT/STEP:31/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 70 PC/SLOT/STEP:31/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 71 PC/SLOT/STEP:31/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 72 PC/SLOT/STEP:32/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 73 PC/SLOT/STEP:32/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:84 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 74 PC/SLOT/STEP:32/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:84 Dst:[0, 84] Rst:[10] AR:35 IO:84
+  [INFO] 75 PC/SLOT/STEP:33/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 84, 84] Rst:[10] AR:35 IO:84
+  [INFO] 76 PC/SLOT/STEP:33/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[0, 84, 84] Rst:[10] AR:35 IO:84
+  [INFO] 77 PC/SLOT/STEP:33/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[0, 84, 84] Rst:[10] AR:33 IO:84
+  [INFO] 78 PC/SLOT/STEP:34/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 84, 84, 0] Rst:[10] AR:33 IO:84
+  [INFO] 79 PC/SLOT/STEP:34/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 84, 84, 0] Rst:[10] AR:33 IO:84
+  [INFO] 80 PC/SLOT/STEP:34/2/0 EI/EAM:0/0 Idepth:0 STI T:0 Dst:[0, 84, 84] Rst:[10] AR:33 IO:84
+  [INFO] 81 PC/SLOT/STEP:34/2/1 EI/EAM:0/0 Idepth:0 STI T:84 Dst:[0, 84] Rst:[10] AR:0 IO:84
+  [INFO] 82 PC/SLOT/STEP:34/3/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[10] AR:0 IO:84
+  [INFO] 83 PC/SLOT/STEP:34/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:0 IO:84
+  [INFO] 84 PC/SLOT/STEP:34/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:0 IO:84
+  [INFO] 85 PC/SLOT/STEP:34/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:0 IO:84
+  [INFO] 86 PC/SLOT/STEP:35/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:0 IO:84
+  [INFO] 87 PC/SLOT/STEP:35/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[10] AR:0 IO:84
+  [INFO] 88 PC/SLOT/STEP:36/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:0 IO:84
+  [INFO] 89 PC/SLOT/STEP:36/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:0 IO:84
+  [INFO] 90 PC/SLOT/STEP:36/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 91 PC/SLOT/STEP:37/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 92 PC/SLOT/STEP:37/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 93 PC/SLOT/STEP:37/2/0 EI/EAM:0/0 Idepth:0 DUP T:1 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 94 PC/SLOT/STEP:37/3/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 95 PC/SLOT/STEP:37/4/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 96 PC/SLOT/STEP:37/5/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 97 PC/SLOT/STEP:37/6/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 98 PC/SLOT/STEP:38/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 99 PC/SLOT/STEP:38/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 100 PC/SLOT/STEP:38/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:1 Dst:[0, 1] Rst:[10] AR:35 IO:84
+  [INFO] 101 PC/SLOT/STEP:39/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 102 PC/SLOT/STEP:39/1/0 EI/EAM:0/0 Idepth:0 DROP T:1 Dst:[0] Rst:[10] AR:35 IO:84
+  [INFO] 103 PC/SLOT/STEP:39/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 104 PC/SLOT/STEP:39/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 105 PC/SLOT/STEP:39/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 106 PC/SLOT/STEP:39/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 107 PC/SLOT/STEP:39/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 108 PC/SLOT/STEP:40/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 109 PC/SLOT/STEP:40/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:35 IO:84
+  [INFO] 110 PC/SLOT/STEP:40/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 111 PC/SLOT/STEP:41/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 112 PC/SLOT/STEP:41/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 113 PC/SLOT/STEP:42/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 114 PC/SLOT/STEP:42/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 84] Rst:[10] AR:34 IO:84
+  [INFO] 115 PC/SLOT/STEP:42/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 116 PC/SLOT/STEP:42/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 117 PC/SLOT/STEP:42/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 118 PC/SLOT/STEP:42/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 119 PC/SLOT/STEP:42/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 120 PC/SLOT/STEP:43/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] IO DEVICE 1 INPUT:65
+  [INFO] 121 PC/SLOT/STEP:43/1/0 EI/EAM:0/0 Idepth:0 BZ(47) T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 122 PC/SLOT/STEP:44/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 123 PC/SLOT/STEP:44/1/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 124 PC/SLOT/STEP:44/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 125 PC/SLOT/STEP:44/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 126 PC/SLOT/STEP:44/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 127 PC/SLOT/STEP:44/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 128 PC/SLOT/STEP:44/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 129 PC/SLOT/STEP:45/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 130 PC/SLOT/STEP:45/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 131 PC/SLOT/STEP:46/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 132 PC/SLOT/STEP:46/1/0 EI/EAM:0/0 Idepth:0 JUMP(49) T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 133 PC/SLOT/STEP:49/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 134 PC/SLOT/STEP:49/1/0 EI/EAM:0/0 Idepth:0 BZ(53) T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 135 PC/SLOT/STEP:53/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 136 PC/SLOT/STEP:53/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:34 IO:84
+  [INFO] 137 PC/SLOT/STEP:53/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 138 PC/SLOT/STEP:53/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 139 PC/SLOT/STEP:53/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 140 PC/SLOT/STEP:53/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 141 PC/SLOT/STEP:53/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 142 PC/SLOT/STEP:54/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 143 PC/SLOT/STEP:54/1/0 EI/EAM:0/0 Idepth:0 JUMP(26) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 144 PC/SLOT/STEP:26/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 145 PC/SLOT/STEP:26/1/0 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:84
+  [INFO] 146 PC/SLOT/STEP:26/1/1 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 147 PC/SLOT/STEP:27/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 148 PC/SLOT/STEP:27/1/0 EI/EAM:0/0 Idepth:0 DUP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 149 PC/SLOT/STEP:27/2/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 150 PC/SLOT/STEP:27/3/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 151 PC/SLOT/STEP:27/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 152 PC/SLOT/STEP:27/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 153 PC/SLOT/STEP:27/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 154 PC/SLOT/STEP:28/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 155 PC/SLOT/STEP:28/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 156 PC/SLOT/STEP:28/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 157 PC/SLOT/STEP:29/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 158 PC/SLOT/STEP:29/1/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 159 PC/SLOT/STEP:29/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 160 PC/SLOT/STEP:29/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 161 PC/SLOT/STEP:29/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 162 PC/SLOT/STEP:29/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 163 PC/SLOT/STEP:29/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 164 PC/SLOT/STEP:30/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 165 PC/SLOT/STEP:30/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 166 PC/SLOT/STEP:30/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 167 PC/SLOT/STEP:31/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 168 PC/SLOT/STEP:31/1/0 EI/EAM:0/0 Idepth:0 DUP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 169 PC/SLOT/STEP:31/2/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 170 PC/SLOT/STEP:31/3/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 171 PC/SLOT/STEP:31/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 172 PC/SLOT/STEP:31/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 173 PC/SLOT/STEP:31/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 174 PC/SLOT/STEP:32/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 175 PC/SLOT/STEP:32/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:65 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 176 PC/SLOT/STEP:32/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:65 Dst:[0, 65] Rst:[10] AR:35 IO:65
+  [INFO] 177 PC/SLOT/STEP:33/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 65, 65] Rst:[10] AR:35 IO:65
+  [INFO] 178 PC/SLOT/STEP:33/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:1 Dst:[0, 65, 65] Rst:[10] AR:35 IO:65
+  [INFO] 179 PC/SLOT/STEP:33/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:1 Dst:[0, 65, 65] Rst:[10] AR:33 IO:65
+  [INFO] 180 PC/SLOT/STEP:34/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 65, 65, 1] Rst:[10] AR:33 IO:65
+  [INFO] 181 PC/SLOT/STEP:34/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 65, 65, 1] Rst:[10] AR:33 IO:65
+  [INFO] 182 PC/SLOT/STEP:34/2/0 EI/EAM:0/0 Idepth:0 STI T:1 Dst:[0, 65, 65] Rst:[10] AR:33 IO:65
+  [INFO] 183 PC/SLOT/STEP:34/2/1 EI/EAM:0/0 Idepth:0 STI T:65 Dst:[0, 65] Rst:[10] AR:1 IO:65
+  [INFO] 184 PC/SLOT/STEP:34/3/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[10] AR:1 IO:65
+  [INFO] 185 PC/SLOT/STEP:34/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:1 IO:65
+  [INFO] 186 PC/SLOT/STEP:34/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:1 IO:65
+  [INFO] 187 PC/SLOT/STEP:34/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:1 IO:65
+  [INFO] 188 PC/SLOT/STEP:35/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:1 IO:65
+  [INFO] 189 PC/SLOT/STEP:35/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[10] AR:1 IO:65
+  [INFO] 190 PC/SLOT/STEP:36/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:1 IO:65
+  [INFO] 191 PC/SLOT/STEP:36/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:1 IO:65
+  [INFO] 192 PC/SLOT/STEP:36/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:35 IO:65
+  [INFO] 193 PC/SLOT/STEP:37/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 1] Rst:[10] AR:35 IO:65
+  [INFO] 194 PC/SLOT/STEP:37/1/0 EI/EAM:0/0 Idepth:0 ADD T:1 Dst:[0, 1] Rst:[10] AR:35 IO:65
+  [INFO] 195 PC/SLOT/STEP:37/2/0 EI/EAM:0/0 Idepth:0 DUP T:2 Dst:[0] Rst:[10] AR:35 IO:65
+  [INFO] 196 PC/SLOT/STEP:37/3/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 197 PC/SLOT/STEP:37/4/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 198 PC/SLOT/STEP:37/5/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 199 PC/SLOT/STEP:37/6/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 200 PC/SLOT/STEP:38/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] IO DEVICE 1 INPUT:83
+  [INFO] 201 PC/SLOT/STEP:38/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 202 PC/SLOT/STEP:38/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0, 2] Rst:[10] AR:35 IO:65
+  [INFO] 203 PC/SLOT/STEP:39/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[10] AR:35 IO:65
+  [INFO] 204 PC/SLOT/STEP:39/1/0 EI/EAM:0/0 Idepth:0 DROP T:2 Dst:[0] Rst:[10] AR:35 IO:65
+  [INFO] 205 PC/SLOT/STEP:39/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 206 PC/SLOT/STEP:39/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 207 PC/SLOT/STEP:39/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 208 PC/SLOT/STEP:39/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 209 PC/SLOT/STEP:39/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 210 PC/SLOT/STEP:40/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 211 PC/SLOT/STEP:40/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:35 IO:65
+  [INFO] 212 PC/SLOT/STEP:40/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 213 PC/SLOT/STEP:41/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 214 PC/SLOT/STEP:41/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 215 PC/SLOT/STEP:42/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 216 PC/SLOT/STEP:42/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 65] Rst:[10] AR:34 IO:65
+  [INFO] 217 PC/SLOT/STEP:42/2/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 218 PC/SLOT/STEP:42/3/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 219 PC/SLOT/STEP:42/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 220 PC/SLOT/STEP:42/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 221 PC/SLOT/STEP:42/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 222 PC/SLOT/STEP:43/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 223 PC/SLOT/STEP:43/1/0 EI/EAM:0/0 Idepth:0 BZ(47) T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 224 PC/SLOT/STEP:44/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 225 PC/SLOT/STEP:44/1/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 226 PC/SLOT/STEP:44/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 227 PC/SLOT/STEP:44/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 228 PC/SLOT/STEP:44/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 229 PC/SLOT/STEP:44/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 230 PC/SLOT/STEP:44/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 231 PC/SLOT/STEP:45/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 232 PC/SLOT/STEP:45/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 233 PC/SLOT/STEP:46/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 234 PC/SLOT/STEP:46/1/0 EI/EAM:0/0 Idepth:0 JUMP(49) T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 235 PC/SLOT/STEP:49/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 236 PC/SLOT/STEP:49/1/0 EI/EAM:0/0 Idepth:0 BZ(53) T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 237 PC/SLOT/STEP:53/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 238 PC/SLOT/STEP:53/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:34 IO:65
+  [INFO] 239 PC/SLOT/STEP:53/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 240 PC/SLOT/STEP:53/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 241 PC/SLOT/STEP:53/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 242 PC/SLOT/STEP:53/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 243 PC/SLOT/STEP:53/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 244 PC/SLOT/STEP:54/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 245 PC/SLOT/STEP:54/1/0 EI/EAM:0/0 Idepth:0 JUMP(26) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 246 PC/SLOT/STEP:26/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 247 PC/SLOT/STEP:26/1/0 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:65
+  [INFO] 248 PC/SLOT/STEP:26/1/1 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 249 PC/SLOT/STEP:27/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 250 PC/SLOT/STEP:27/1/0 EI/EAM:0/0 Idepth:0 DUP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 251 PC/SLOT/STEP:27/2/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 252 PC/SLOT/STEP:27/3/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 253 PC/SLOT/STEP:27/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 254 PC/SLOT/STEP:27/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 255 PC/SLOT/STEP:27/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 256 PC/SLOT/STEP:28/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 257 PC/SLOT/STEP:28/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 258 PC/SLOT/STEP:28/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 259 PC/SLOT/STEP:29/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 260 PC/SLOT/STEP:29/1/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 261 PC/SLOT/STEP:29/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 262 PC/SLOT/STEP:29/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 263 PC/SLOT/STEP:29/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 264 PC/SLOT/STEP:29/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 265 PC/SLOT/STEP:29/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 266 PC/SLOT/STEP:30/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 267 PC/SLOT/STEP:30/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 268 PC/SLOT/STEP:30/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 269 PC/SLOT/STEP:31/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 270 PC/SLOT/STEP:31/1/0 EI/EAM:0/0 Idepth:0 DUP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 271 PC/SLOT/STEP:31/2/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 272 PC/SLOT/STEP:31/3/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 273 PC/SLOT/STEP:31/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 274 PC/SLOT/STEP:31/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 275 PC/SLOT/STEP:31/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 276 PC/SLOT/STEP:32/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 277 PC/SLOT/STEP:32/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:83 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 278 PC/SLOT/STEP:32/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:83 Dst:[0, 83] Rst:[10] AR:35 IO:83
+  [INFO] 279 PC/SLOT/STEP:33/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 83, 83] Rst:[10] AR:35 IO:83
+  [INFO] 280 PC/SLOT/STEP:33/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0, 83, 83] Rst:[10] AR:35 IO:83
+  [INFO] IO DEVICE 1 INPUT:0
+  [INFO] 281 PC/SLOT/STEP:33/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0, 83, 83] Rst:[10] AR:33 IO:83
+  [INFO] 282 PC/SLOT/STEP:34/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 83, 83, 2] Rst:[10] AR:33 IO:83
+  [INFO] 283 PC/SLOT/STEP:34/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 83, 83, 2] Rst:[10] AR:33 IO:83
+  [INFO] 284 PC/SLOT/STEP:34/2/0 EI/EAM:0/0 Idepth:0 STI T:2 Dst:[0, 83, 83] Rst:[10] AR:33 IO:83
+  [INFO] 285 PC/SLOT/STEP:34/2/1 EI/EAM:0/0 Idepth:0 STI T:83 Dst:[0, 83] Rst:[10] AR:2 IO:83
+  [INFO] 286 PC/SLOT/STEP:34/3/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[10] AR:2 IO:83
+  [INFO] 287 PC/SLOT/STEP:34/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:2 IO:83
+  [INFO] 288 PC/SLOT/STEP:34/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:2 IO:83
+  [INFO] 289 PC/SLOT/STEP:34/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:2 IO:83
+  [INFO] 290 PC/SLOT/STEP:35/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:2 IO:83
+  [INFO] 291 PC/SLOT/STEP:35/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[10] AR:2 IO:83
+  [INFO] 292 PC/SLOT/STEP:36/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:2 IO:83
+  [INFO] 293 PC/SLOT/STEP:36/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:2 IO:83
+  [INFO] 294 PC/SLOT/STEP:36/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:35 IO:83
+  [INFO] 295 PC/SLOT/STEP:37/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 1] Rst:[10] AR:35 IO:83
+  [INFO] 296 PC/SLOT/STEP:37/1/0 EI/EAM:0/0 Idepth:0 ADD T:2 Dst:[0, 1] Rst:[10] AR:35 IO:83
+  [INFO] 297 PC/SLOT/STEP:37/2/0 EI/EAM:0/0 Idepth:0 DUP T:3 Dst:[0] Rst:[10] AR:35 IO:83
+  [INFO] 298 PC/SLOT/STEP:37/3/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 299 PC/SLOT/STEP:37/4/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 300 PC/SLOT/STEP:37/5/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 301 PC/SLOT/STEP:37/6/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 302 PC/SLOT/STEP:38/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 303 PC/SLOT/STEP:38/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 304 PC/SLOT/STEP:38/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:3 Dst:[0, 3] Rst:[10] AR:35 IO:83
+  [INFO] 305 PC/SLOT/STEP:39/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[10] AR:35 IO:83
+  [INFO] 306 PC/SLOT/STEP:39/1/0 EI/EAM:0/0 Idepth:0 DROP T:3 Dst:[0] Rst:[10] AR:35 IO:83
+  [INFO] 307 PC/SLOT/STEP:39/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 308 PC/SLOT/STEP:39/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 309 PC/SLOT/STEP:39/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 310 PC/SLOT/STEP:39/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 311 PC/SLOT/STEP:39/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 312 PC/SLOT/STEP:40/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 313 PC/SLOT/STEP:40/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:35 IO:83
+  [INFO] 314 PC/SLOT/STEP:40/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 315 PC/SLOT/STEP:41/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 316 PC/SLOT/STEP:41/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 317 PC/SLOT/STEP:42/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 318 PC/SLOT/STEP:42/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 83] Rst:[10] AR:34 IO:83
+  [INFO] 319 PC/SLOT/STEP:42/2/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 320 PC/SLOT/STEP:42/3/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 321 PC/SLOT/STEP:42/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 322 PC/SLOT/STEP:42/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 323 PC/SLOT/STEP:42/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 324 PC/SLOT/STEP:43/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 325 PC/SLOT/STEP:43/1/0 EI/EAM:0/0 Idepth:0 BZ(47) T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 326 PC/SLOT/STEP:44/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 327 PC/SLOT/STEP:44/1/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 328 PC/SLOT/STEP:44/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 329 PC/SLOT/STEP:44/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 330 PC/SLOT/STEP:44/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 331 PC/SLOT/STEP:44/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 332 PC/SLOT/STEP:44/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 333 PC/SLOT/STEP:45/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 334 PC/SLOT/STEP:45/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 335 PC/SLOT/STEP:46/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 336 PC/SLOT/STEP:46/1/0 EI/EAM:0/0 Idepth:0 JUMP(49) T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 337 PC/SLOT/STEP:49/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 338 PC/SLOT/STEP:49/1/0 EI/EAM:0/0 Idepth:0 BZ(53) T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 339 PC/SLOT/STEP:53/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 340 PC/SLOT/STEP:53/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:34 IO:83
+  [INFO] 341 PC/SLOT/STEP:53/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 342 PC/SLOT/STEP:53/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 343 PC/SLOT/STEP:53/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 344 PC/SLOT/STEP:53/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 345 PC/SLOT/STEP:53/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 346 PC/SLOT/STEP:54/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 347 PC/SLOT/STEP:54/1/0 EI/EAM:0/0 Idepth:0 JUMP(26) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 348 PC/SLOT/STEP:26/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 349 PC/SLOT/STEP:26/1/0 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:83
+  [INFO] 350 PC/SLOT/STEP:26/1/1 EI/EAM:0/0 Idepth:0 IN(1) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 351 PC/SLOT/STEP:27/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 352 PC/SLOT/STEP:27/1/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 353 PC/SLOT/STEP:27/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 354 PC/SLOT/STEP:27/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 355 PC/SLOT/STEP:27/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 356 PC/SLOT/STEP:27/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 357 PC/SLOT/STEP:27/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 358 PC/SLOT/STEP:28/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 359 PC/SLOT/STEP:28/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 360 PC/SLOT/STEP:28/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 361 PC/SLOT/STEP:29/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 362 PC/SLOT/STEP:29/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 363 PC/SLOT/STEP:29/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 364 PC/SLOT/STEP:29/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 365 PC/SLOT/STEP:29/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 366 PC/SLOT/STEP:29/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 367 PC/SLOT/STEP:29/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 368 PC/SLOT/STEP:30/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 369 PC/SLOT/STEP:30/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 370 PC/SLOT/STEP:30/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 371 PC/SLOT/STEP:31/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 372 PC/SLOT/STEP:31/1/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 373 PC/SLOT/STEP:31/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 374 PC/SLOT/STEP:31/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 375 PC/SLOT/STEP:31/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 376 PC/SLOT/STEP:31/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 377 PC/SLOT/STEP:31/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 378 PC/SLOT/STEP:32/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 379 PC/SLOT/STEP:32/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 380 PC/SLOT/STEP:32/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[0, 0] Rst:[10] AR:35 IO:0
+  [INFO] 381 PC/SLOT/STEP:33/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 0, 0] Rst:[10] AR:35 IO:0
+  [INFO] 382 PC/SLOT/STEP:33/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:3 Dst:[0, 0, 0] Rst:[10] AR:35 IO:0
+  [INFO] 383 PC/SLOT/STEP:33/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:3 Dst:[0, 0, 0] Rst:[10] AR:33 IO:0
+  [INFO] 384 PC/SLOT/STEP:34/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0, 0, 3] Rst:[10] AR:33 IO:0
+  [INFO] 385 PC/SLOT/STEP:34/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 0, 0, 3] Rst:[10] AR:33 IO:0
+  [INFO] 386 PC/SLOT/STEP:34/2/0 EI/EAM:0/0 Idepth:0 STI T:3 Dst:[0, 0, 0] Rst:[10] AR:33 IO:0
+  [INFO] 387 PC/SLOT/STEP:34/2/1 EI/EAM:0/0 Idepth:0 STI T:0 Dst:[0, 0] Rst:[10] AR:3 IO:0
+  [INFO] 388 PC/SLOT/STEP:34/3/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:3 IO:0
+  [INFO] 389 PC/SLOT/STEP:34/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:3 IO:0
+  [INFO] 390 PC/SLOT/STEP:34/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:3 IO:0
+  [INFO] 391 PC/SLOT/STEP:34/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:3 IO:0
+  [INFO] 392 PC/SLOT/STEP:35/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:3 IO:0
+  [INFO] 393 PC/SLOT/STEP:35/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[10] AR:3 IO:0
+  [INFO] 394 PC/SLOT/STEP:36/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:3 IO:0
+  [INFO] 395 PC/SLOT/STEP:36/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:3 IO:0
+  [INFO] 396 PC/SLOT/STEP:36/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[10] AR:35 IO:0
+  [INFO] 397 PC/SLOT/STEP:37/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 1] Rst:[10] AR:35 IO:0
+  [INFO] 398 PC/SLOT/STEP:37/1/0 EI/EAM:0/0 Idepth:0 ADD T:3 Dst:[0, 1] Rst:[10] AR:35 IO:0
+  [INFO] 399 PC/SLOT/STEP:37/2/0 EI/EAM:0/0 Idepth:0 DUP T:4 Dst:[0] Rst:[10] AR:35 IO:0
+  [INFO] 400 PC/SLOT/STEP:37/3/0 EI/EAM:0/0 Idepth:0 NOP T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 401 PC/SLOT/STEP:37/4/0 EI/EAM:0/0 Idepth:0 NOP T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 402 PC/SLOT/STEP:37/5/0 EI/EAM:0/0 Idepth:0 NOP T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 403 PC/SLOT/STEP:37/6/0 EI/EAM:0/0 Idepth:0 NOP T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 404 PC/SLOT/STEP:38/0/0 EI/EAM:0/0 Idepth:0 --- T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 405 PC/SLOT/STEP:38/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 406 PC/SLOT/STEP:38/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:4 Dst:[0, 4] Rst:[10] AR:35 IO:0
+  [INFO] 407 PC/SLOT/STEP:39/0/0 EI/EAM:0/0 Idepth:0 --- T:4 Dst:[0] Rst:[10] AR:35 IO:0
+  [INFO] 408 PC/SLOT/STEP:39/1/0 EI/EAM:0/0 Idepth:0 DROP T:4 Dst:[0] Rst:[10] AR:35 IO:0
+  [INFO] 409 PC/SLOT/STEP:39/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 410 PC/SLOT/STEP:39/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 411 PC/SLOT/STEP:39/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 412 PC/SLOT/STEP:39/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 413 PC/SLOT/STEP:39/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 414 PC/SLOT/STEP:40/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 415 PC/SLOT/STEP:40/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:35 IO:0
+  [INFO] 416 PC/SLOT/STEP:40/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 417 PC/SLOT/STEP:41/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 418 PC/SLOT/STEP:41/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 419 PC/SLOT/STEP:42/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 420 PC/SLOT/STEP:42/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 0] Rst:[10] AR:34 IO:0
+  [INFO] 421 PC/SLOT/STEP:42/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 422 PC/SLOT/STEP:42/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 423 PC/SLOT/STEP:42/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 424 PC/SLOT/STEP:42/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 425 PC/SLOT/STEP:42/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 426 PC/SLOT/STEP:43/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 427 PC/SLOT/STEP:43/1/0 EI/EAM:0/0 Idepth:0 BZ(47) T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 428 PC/SLOT/STEP:47/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 429 PC/SLOT/STEP:47/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 430 PC/SLOT/STEP:47/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 431 PC/SLOT/STEP:47/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 432 PC/SLOT/STEP:47/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 433 PC/SLOT/STEP:47/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 434 PC/SLOT/STEP:47/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 435 PC/SLOT/STEP:48/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 436 PC/SLOT/STEP:48/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 437 PC/SLOT/STEP:49/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 438 PC/SLOT/STEP:49/1/0 EI/EAM:0/0 Idepth:0 BZ(53) T:1 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 439 PC/SLOT/STEP:50/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 440 PC/SLOT/STEP:50/1/0 EI/EAM:0/0 Idepth:0 DROP T:1 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 441 PC/SLOT/STEP:50/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 442 PC/SLOT/STEP:50/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 443 PC/SLOT/STEP:50/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 444 PC/SLOT/STEP:50/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 445 PC/SLOT/STEP:50/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 446 PC/SLOT/STEP:51/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 447 PC/SLOT/STEP:51/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[10] AR:34 IO:0
+  [INFO] 448 PC/SLOT/STEP:52/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 449 PC/SLOT/STEP:52/1/0 EI/EAM:0/0 Idepth:0 JUMP(55) T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 450 PC/SLOT/STEP:55/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 451 PC/SLOT/STEP:55/1/0 EI/EAM:0/0 Idepth:0 RET T:0 Dst:[0] Rst:[10] AR:34 IO:0
+  [INFO] 452 PC/SLOT/STEP:10/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:34 IO:0
+  [INFO] 453 PC/SLOT/STEP:10/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[] AR:34 IO:0
+  [INFO] 454 PC/SLOT/STEP:10/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 455 PC/SLOT/STEP:10/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 456 PC/SLOT/STEP:10/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 457 PC/SLOT/STEP:10/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 458 PC/SLOT/STEP:10/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 459 PC/SLOT/STEP:11/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 460 PC/SLOT/STEP:11/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[] AR:34 IO:0
+  [INFO] 461 PC/SLOT/STEP:12/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[] AR:34 IO:0
+  [INFO] 462 PC/SLOT/STEP:12/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[] AR:34 IO:0
+  [INFO] 463 PC/SLOT/STEP:12/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 464 PC/SLOT/STEP:13/0/0 EI/EAM:0/0 Idepth:0 --- T:4 Dst:[0, 1] Rst:[] AR:35 IO:0
+  [INFO] 465 PC/SLOT/STEP:13/1/0 EI/EAM:0/0 Idepth:0 SUB T:4 Dst:[0, 1] Rst:[] AR:35 IO:0
+  [INFO] 466 PC/SLOT/STEP:13/2/0 EI/EAM:0/0 Idepth:0 DUP T:3 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 467 PC/SLOT/STEP:13/3/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 468 PC/SLOT/STEP:13/4/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 469 PC/SLOT/STEP:13/5/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 470 PC/SLOT/STEP:13/6/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 471 PC/SLOT/STEP:14/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 472 PC/SLOT/STEP:14/1/0 EI/EAM:0/0 Idepth:0 ST(41) T:3 Dst:[0, 3] Rst:[] AR:35 IO:0
+  [INFO] 473 PC/SLOT/STEP:14/1/1 EI/EAM:0/0 Idepth:0 ST(41) T:3 Dst:[0, 3] Rst:[] AR:41 IO:0
+  [INFO] 474 PC/SLOT/STEP:15/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 475 PC/SLOT/STEP:15/1/0 EI/EAM:0/0 Idepth:0 DROP T:3 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 476 PC/SLOT/STEP:15/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 477 PC/SLOT/STEP:15/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 478 PC/SLOT/STEP:15/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 479 PC/SLOT/STEP:15/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 480 PC/SLOT/STEP:15/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 481 PC/SLOT/STEP:16/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 482 PC/SLOT/STEP:16/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 483 PC/SLOT/STEP:16/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[] Rst:[] AR:33 IO:0
+  [INFO] 484 PC/SLOT/STEP:17/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 485 PC/SLOT/STEP:17/1/0 EI/EAM:0/0 Idepth:0 LD(41) T:0 Dst:[0] Rst:[] AR:33 IO:0
+  [INFO] 486 PC/SLOT/STEP:17/1/1 EI/EAM:0/0 Idepth:0 LD(41) T:0 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 487 PC/SLOT/STEP:18/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 488 PC/SLOT/STEP:18/1/0 EI/EAM:0/0 Idepth:0 CALL(182) T:3 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 489 PC/SLOT/STEP:182/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 0] Rst:[19] AR:41 IO:0
+  [INFO] 490 PC/SLOT/STEP:182/1/0 EI/EAM:0/0 Idepth:0 ST(39) T:3 Dst:[0, 0] Rst:[19] AR:41 IO:0
+  [INFO] 491 PC/SLOT/STEP:182/1/1 EI/EAM:0/0 Idepth:0 ST(39) T:3 Dst:[0, 0] Rst:[19] AR:39 IO:0
+  [INFO] 492 PC/SLOT/STEP:183/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19] AR:39 IO:0
+  [INFO] 493 PC/SLOT/STEP:183/1/0 EI/EAM:0/0 Idepth:0 ST(30) T:0 Dst:[0] Rst:[19] AR:39 IO:0
+  [INFO] 494 PC/SLOT/STEP:183/1/1 EI/EAM:0/0 Idepth:0 ST(30) T:0 Dst:[0] Rst:[19] AR:30 IO:0
+  [INFO] 495 PC/SLOT/STEP:184/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19] AR:30 IO:0
+  ...
+  [INFO] 1402 PC/SLOT/STEP:171/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:1 IO:0
+  [INFO] 1403 PC/SLOT/STEP:172/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19, 198] AR:1 IO:0
+  [INFO] 1404 PC/SLOT/STEP:172/1/0 EI/EAM:0/0 Idepth:0 LD(42) T:0 Dst:[] Rst:[19, 198] AR:1 IO:0
+  [INFO] 1405 PC/SLOT/STEP:172/1/1 EI/EAM:0/0 Idepth:0 LD(42) T:0 Dst:[] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1406 PC/SLOT/STEP:173/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1407 PC/SLOT/STEP:173/1/0 EI/EAM:0/0 Idepth:0 DUP T:84 Dst:[0] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1408 PC/SLOT/STEP:173/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1409 PC/SLOT/STEP:173/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1410 PC/SLOT/STEP:173/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1411 PC/SLOT/STEP:173/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1412 PC/SLOT/STEP:173/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1413 PC/SLOT/STEP:174/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1414 PC/SLOT/STEP:174/1/0 EI/EAM:0/0 Idepth:0 LD(40) T:84 Dst:[0, 84] Rst:[19, 198] AR:42 IO:0
+  [INFO] 1415 PC/SLOT/STEP:174/1/1 EI/EAM:0/0 Idepth:0 LD(40) T:84 Dst:[0, 84] Rst:[19, 198] AR:40 IO:0
+  [INFO] 1416 PC/SLOT/STEP:175/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 84, 84] Rst:[19, 198] AR:40 IO:0
+  [INFO] 1417 PC/SLOT/STEP:175/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0, 84, 84] Rst:[19, 198] AR:40 IO:0
+  [INFO] 1418 PC/SLOT/STEP:175/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0, 84, 84] Rst:[19, 198] AR:33 IO:0
+  [INFO] 1419 PC/SLOT/STEP:176/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 84, 84, 2] Rst:[19, 198] AR:33 IO:0
+  [INFO] 1420 PC/SLOT/STEP:176/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 84, 84, 2] Rst:[19, 198] AR:33 IO:0
+  [INFO] 1421 PC/SLOT/STEP:176/2/0 EI/EAM:0/0 Idepth:0 STI T:2 Dst:[0, 84, 84] Rst:[19, 198] AR:33 IO:0
+  [INFO] 1422 PC/SLOT/STEP:176/2/1 EI/EAM:0/0 Idepth:0 STI T:84 Dst:[0, 84] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1423 PC/SLOT/STEP:176/3/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1424 PC/SLOT/STEP:176/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1425 PC/SLOT/STEP:176/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1426 PC/SLOT/STEP:176/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1427 PC/SLOT/STEP:177/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1428 PC/SLOT/STEP:177/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1429 PC/SLOT/STEP:178/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1430 PC/SLOT/STEP:178/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[19, 198] AR:2 IO:0
+  [INFO] 1431 PC/SLOT/STEP:178/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1432 PC/SLOT/STEP:179/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 1] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1433 PC/SLOT/STEP:179/1/0 EI/EAM:0/0 Idepth:0 ADD T:1 Dst:[0, 1] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1434 PC/SLOT/STEP:179/2/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1435 PC/SLOT/STEP:179/3/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1436 PC/SLOT/STEP:179/4/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1437 PC/SLOT/STEP:179/5/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1438 PC/SLOT/STEP:179/6/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1439 PC/SLOT/STEP:180/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1440 PC/SLOT/STEP:180/1/0 EI/EAM:0/0 Idepth:0 JUMP(135) T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1441 PC/SLOT/STEP:135/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1442 PC/SLOT/STEP:135/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1443 PC/SLOT/STEP:135/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1444 PC/SLOT/STEP:136/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1445 PC/SLOT/STEP:136/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1446 PC/SLOT/STEP:136/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1447 PC/SLOT/STEP:137/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1448 PC/SLOT/STEP:137/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:2 Dst:[0] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1449 PC/SLOT/STEP:138/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 2] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1450 PC/SLOT/STEP:138/1/0 EI/EAM:0/0 Idepth:0 LD(41) T:1 Dst:[0, 2] Rst:[19, 198] AR:35 IO:0
+  [INFO] 1451 PC/SLOT/STEP:138/1/1 EI/EAM:0/0 Idepth:0 LD(41) T:1 Dst:[0, 2] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1452 PC/SLOT/STEP:139/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 2, 1] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1453 PC/SLOT/STEP:139/1/0 EI/EAM:0/0 Idepth:0 SUB T:3 Dst:[0, 2, 1] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1454 PC/SLOT/STEP:139/2/0 EI/EAM:0/0 Idepth:0 SUB T:2 Dst:[0, 2] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1455 PC/SLOT/STEP:139/3/0 EI/EAM:0/0 Idepth:0 NEG T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1456 PC/SLOT/STEP:139/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1457 PC/SLOT/STEP:139/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1458 PC/SLOT/STEP:139/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1459 PC/SLOT/STEP:140/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1460 PC/SLOT/STEP:140/1/0 EI/EAM:0/0 Idepth:0 BPOS(145) T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1461 PC/SLOT/STEP:141/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1462 PC/SLOT/STEP:141/1/0 EI/EAM:0/0 Idepth:0 BZ(145) T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1463 PC/SLOT/STEP:145/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1464 PC/SLOT/STEP:145/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1465 PC/SLOT/STEP:145/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1466 PC/SLOT/STEP:145/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1467 PC/SLOT/STEP:145/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1468 PC/SLOT/STEP:145/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1469 PC/SLOT/STEP:145/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1470 PC/SLOT/STEP:146/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1471 PC/SLOT/STEP:146/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1472 PC/SLOT/STEP:147/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1473 PC/SLOT/STEP:147/1/0 EI/EAM:0/0 Idepth:0 BZ(151) T:1 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1474 PC/SLOT/STEP:148/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1475 PC/SLOT/STEP:148/1/0 EI/EAM:0/0 Idepth:0 DROP T:1 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1476 PC/SLOT/STEP:148/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1477 PC/SLOT/STEP:148/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1478 PC/SLOT/STEP:148/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1479 PC/SLOT/STEP:148/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1480 PC/SLOT/STEP:148/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1481 PC/SLOT/STEP:149/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1482 PC/SLOT/STEP:149/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1483 PC/SLOT/STEP:150/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1484 PC/SLOT/STEP:150/1/0 EI/EAM:0/0 Idepth:0 JUMP(181) T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1485 PC/SLOT/STEP:181/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1486 PC/SLOT/STEP:181/1/0 EI/EAM:0/0 Idepth:0 RET T:0 Dst:[0] Rst:[19, 198] AR:41 IO:0
+  [INFO] 1487 PC/SLOT/STEP:198/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[19] AR:41 IO:0
+  [INFO] 1488 PC/SLOT/STEP:198/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[19] AR:41 IO:0
+  [INFO] 1489 PC/SLOT/STEP:198/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1490 PC/SLOT/STEP:198/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1491 PC/SLOT/STEP:198/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1492 PC/SLOT/STEP:198/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1493 PC/SLOT/STEP:198/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1494 PC/SLOT/STEP:199/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1495 PC/SLOT/STEP:199/1/0 EI/EAM:0/0 Idepth:0 LD(41) T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1496 PC/SLOT/STEP:199/1/1 EI/EAM:0/0 Idepth:0 LD(41) T:0 Dst:[] Rst:[19] AR:41 IO:0
+  [INFO] 1497 PC/SLOT/STEP:200/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[19] AR:41 IO:0
+  [INFO] 1498 PC/SLOT/STEP:200/1/0 EI/EAM:0/0 Idepth:0 RET T:3 Dst:[0] Rst:[19] AR:41 IO:0
+  [INFO] 1499 PC/SLOT/STEP:19/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 1500 PC/SLOT/STEP:19/1/0 EI/EAM:0/0 Idepth:0 DROP T:3 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 1501 PC/SLOT/STEP:19/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1502 PC/SLOT/STEP:19/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1503 PC/SLOT/STEP:19/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1504 PC/SLOT/STEP:19/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1505 PC/SLOT/STEP:19/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1506 PC/SLOT/STEP:20/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1507 PC/SLOT/STEP:20/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[] AR:41 IO:0
+  [INFO] 1508 PC/SLOT/STEP:21/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 1509 PC/SLOT/STEP:21/1/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[] AR:41 IO:0
+  [INFO] 1510 PC/SLOT/STEP:21/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1511 PC/SLOT/STEP:21/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1512 PC/SLOT/STEP:21/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1513 PC/SLOT/STEP:21/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1514 PC/SLOT/STEP:21/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1515 PC/SLOT/STEP:22/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1516 PC/SLOT/STEP:22/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:0 Dst:[0, 0] Rst:[] AR:41 IO:0
+  [INFO] 1517 PC/SLOT/STEP:22/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:0 Dst:[0, 0] Rst:[] AR:35 IO:0
+  [INFO] 1518 PC/SLOT/STEP:23/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 1519 PC/SLOT/STEP:23/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[] AR:35 IO:0
+  [INFO] 1520 PC/SLOT/STEP:23/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1521 PC/SLOT/STEP:23/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1522 PC/SLOT/STEP:23/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1523 PC/SLOT/STEP:23/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1524 PC/SLOT/STEP:23/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1525 PC/SLOT/STEP:24/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1526 PC/SLOT/STEP:24/1/0 EI/EAM:0/0 Idepth:0 CALL(56) T:0 Dst:[] Rst:[] AR:35 IO:0
+  [INFO] 1527 PC/SLOT/STEP:56/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:0
+  [INFO] 1528 PC/SLOT/STEP:56/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:0
+  [INFO] 1529 PC/SLOT/STEP:56/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:0
+  [INFO] 1530 PC/SLOT/STEP:57/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:35 IO:0
+  [INFO] 1531 PC/SLOT/STEP:57/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[0] Rst:[25] AR:35 IO:0
+  [INFO] 1532 PC/SLOT/STEP:57/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:0 Dst:[0] Rst:[25] AR:33 IO:0
+  [INFO] 1533 PC/SLOT/STEP:58/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[25] AR:33 IO:0
+  [INFO] 1534 PC/SLOT/STEP:58/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 0] Rst:[25] AR:33 IO:0
+  [INFO] 1535 PC/SLOT/STEP:58/2/0 EI/EAM:0/0 Idepth:0 LDI T:0 Dst:[0] Rst:[25] AR:33 IO:0
+  [INFO] 1536 PC/SLOT/STEP:58/2/1 EI/EAM:0/0 Idepth:0 LDI T:0 Dst:[] Rst:[25] AR:0 IO:0
+  [INFO] 1537 PC/SLOT/STEP:58/3/0 EI/EAM:0/0 Idepth:0 DUP T:65 Dst:[0] Rst:[25] AR:0 IO:0
+  [INFO] 1538 PC/SLOT/STEP:58/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:0 IO:0
+  [INFO] 1539 PC/SLOT/STEP:58/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:0 IO:0
+  [INFO] 1540 PC/SLOT/STEP:58/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:0 IO:0
+  [INFO] 1541 PC/SLOT/STEP:59/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0, 65] Rst:[25] AR:0 IO:0
+  [INFO] 1542 PC/SLOT/STEP:59/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:65 Dst:[0, 65] Rst:[25] AR:0 IO:0
+  [INFO] 1543 PC/SLOT/STEP:59/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1544 PC/SLOT/STEP:60/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1545 PC/SLOT/STEP:60/1/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1546 PC/SLOT/STEP:60/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1547 PC/SLOT/STEP:60/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1548 PC/SLOT/STEP:60/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1549 PC/SLOT/STEP:60/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1550 PC/SLOT/STEP:60/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1551 PC/SLOT/STEP:61/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1552 PC/SLOT/STEP:61/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1553 PC/SLOT/STEP:61/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1554 PC/SLOT/STEP:62/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1555 PC/SLOT/STEP:62/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1556 PC/SLOT/STEP:63/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1557 PC/SLOT/STEP:63/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1558 PC/SLOT/STEP:63/2/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1559 PC/SLOT/STEP:63/3/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1560 PC/SLOT/STEP:63/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1561 PC/SLOT/STEP:63/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1562 PC/SLOT/STEP:63/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1563 PC/SLOT/STEP:64/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1564 PC/SLOT/STEP:64/1/0 EI/EAM:0/0 Idepth:0 BZ(68) T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1565 PC/SLOT/STEP:65/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1566 PC/SLOT/STEP:65/1/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1567 PC/SLOT/STEP:65/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1568 PC/SLOT/STEP:65/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1569 PC/SLOT/STEP:65/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1570 PC/SLOT/STEP:65/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1571 PC/SLOT/STEP:65/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1572 PC/SLOT/STEP:66/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1573 PC/SLOT/STEP:66/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1574 PC/SLOT/STEP:67/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1575 PC/SLOT/STEP:67/1/0 EI/EAM:0/0 Idepth:0 JUMP(70) T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1576 PC/SLOT/STEP:70/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1577 PC/SLOT/STEP:70/1/0 EI/EAM:0/0 Idepth:0 BZ(74) T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1578 PC/SLOT/STEP:74/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1579 PC/SLOT/STEP:74/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1580 PC/SLOT/STEP:74/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1581 PC/SLOT/STEP:74/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1582 PC/SLOT/STEP:74/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1583 PC/SLOT/STEP:74/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1584 PC/SLOT/STEP:74/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1585 PC/SLOT/STEP:75/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1586 PC/SLOT/STEP:75/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1587 PC/SLOT/STEP:75/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:0
+  [INFO] 1588 PC/SLOT/STEP:76/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1589 PC/SLOT/STEP:76/1/0 EI/EAM:0/0 Idepth:0 DUP T:65 Dst:[0] Rst:[25] AR:34 IO:0
+  [INFO] 1590 PC/SLOT/STEP:76/2/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1591 PC/SLOT/STEP:76/3/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1592 PC/SLOT/STEP:76/4/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1593 PC/SLOT/STEP:76/5/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1594 PC/SLOT/STEP:76/6/0 EI/EAM:0/0 Idepth:0 NOP T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1595 PC/SLOT/STEP:77/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1596 PC/SLOT/STEP:77/1/0 EI/EAM:0/0 Idepth:0 OUT(1) T:65 Dst:[0, 65] Rst:[25] AR:34 IO:0
+  [INFO] 1597 PC/SLOT/STEP:77/1/1 EI/EAM:0/0 Idepth:0 OUT(1) T:65 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] IO DEVICE 1 <- 65
+  [INFO] 1598 PC/SLOT/STEP:78/0/0 EI/EAM:0/0 Idepth:0 --- T:65 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1599 PC/SLOT/STEP:78/1/0 EI/EAM:0/0 Idepth:0 DROP T:65 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1600 PC/SLOT/STEP:78/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1601 PC/SLOT/STEP:78/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1602 PC/SLOT/STEP:78/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1603 PC/SLOT/STEP:78/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1604 PC/SLOT/STEP:78/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1605 PC/SLOT/STEP:79/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1606 PC/SLOT/STEP:79/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1607 PC/SLOT/STEP:80/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1608 PC/SLOT/STEP:80/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1609 PC/SLOT/STEP:80/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1610 PC/SLOT/STEP:81/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1611 PC/SLOT/STEP:81/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1612 PC/SLOT/STEP:81/2/0 EI/EAM:0/0 Idepth:0 DUP T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1613 PC/SLOT/STEP:81/3/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1614 PC/SLOT/STEP:81/4/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1615 PC/SLOT/STEP:81/5/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1616 PC/SLOT/STEP:81/6/0 EI/EAM:0/0 Idepth:0 NOP T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1617 PC/SLOT/STEP:82/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1618 PC/SLOT/STEP:82/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1619 PC/SLOT/STEP:82/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:1 Dst:[0, 1] Rst:[25] AR:35 IO:65
+  [INFO] 1620 PC/SLOT/STEP:83/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1621 PC/SLOT/STEP:83/1/0 EI/EAM:0/0 Idepth:0 DROP T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1622 PC/SLOT/STEP:83/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1623 PC/SLOT/STEP:83/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1624 PC/SLOT/STEP:83/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1625 PC/SLOT/STEP:83/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1626 PC/SLOT/STEP:83/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1627 PC/SLOT/STEP:84/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1628 PC/SLOT/STEP:84/1/0 EI/EAM:0/0 Idepth:0 JUMP(56) T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1629 PC/SLOT/STEP:56/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1630 PC/SLOT/STEP:56/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1631 PC/SLOT/STEP:56/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:65
+  [INFO] 1632 PC/SLOT/STEP:57/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1633 PC/SLOT/STEP:57/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:1 Dst:[0] Rst:[25] AR:35 IO:65
+  [INFO] 1634 PC/SLOT/STEP:57/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:1 Dst:[0] Rst:[25] AR:33 IO:65
+  [INFO] 1635 PC/SLOT/STEP:58/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 1] Rst:[25] AR:33 IO:65
+  [INFO] 1636 PC/SLOT/STEP:58/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 1] Rst:[25] AR:33 IO:65
+  [INFO] 1637 PC/SLOT/STEP:58/2/0 EI/EAM:0/0 Idepth:0 LDI T:1 Dst:[0] Rst:[25] AR:33 IO:65
+  [INFO] 1638 PC/SLOT/STEP:58/2/1 EI/EAM:0/0 Idepth:0 LDI T:0 Dst:[] Rst:[25] AR:1 IO:65
+  [INFO] 1639 PC/SLOT/STEP:58/3/0 EI/EAM:0/0 Idepth:0 DUP T:83 Dst:[0] Rst:[25] AR:1 IO:65
+  [INFO] 1640 PC/SLOT/STEP:58/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:1 IO:65
+  [INFO] 1641 PC/SLOT/STEP:58/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:1 IO:65
+  [INFO] 1642 PC/SLOT/STEP:58/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:1 IO:65
+  [INFO] 1643 PC/SLOT/STEP:59/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0, 83] Rst:[25] AR:1 IO:65
+  [INFO] 1644 PC/SLOT/STEP:59/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:83 Dst:[0, 83] Rst:[25] AR:1 IO:65
+  [INFO] 1645 PC/SLOT/STEP:59/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1646 PC/SLOT/STEP:60/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1647 PC/SLOT/STEP:60/1/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1648 PC/SLOT/STEP:60/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1649 PC/SLOT/STEP:60/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1650 PC/SLOT/STEP:60/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1651 PC/SLOT/STEP:60/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1652 PC/SLOT/STEP:60/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1653 PC/SLOT/STEP:61/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1654 PC/SLOT/STEP:61/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1655 PC/SLOT/STEP:61/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1656 PC/SLOT/STEP:62/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1657 PC/SLOT/STEP:62/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1658 PC/SLOT/STEP:63/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1659 PC/SLOT/STEP:63/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1660 PC/SLOT/STEP:63/2/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1661 PC/SLOT/STEP:63/3/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1662 PC/SLOT/STEP:63/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1663 PC/SLOT/STEP:63/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1664 PC/SLOT/STEP:63/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1665 PC/SLOT/STEP:64/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1666 PC/SLOT/STEP:64/1/0 EI/EAM:0/0 Idepth:0 BZ(68) T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1667 PC/SLOT/STEP:65/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1668 PC/SLOT/STEP:65/1/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1669 PC/SLOT/STEP:65/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1670 PC/SLOT/STEP:65/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1671 PC/SLOT/STEP:65/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1672 PC/SLOT/STEP:65/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1673 PC/SLOT/STEP:65/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1674 PC/SLOT/STEP:66/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1675 PC/SLOT/STEP:66/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1676 PC/SLOT/STEP:67/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1677 PC/SLOT/STEP:67/1/0 EI/EAM:0/0 Idepth:0 JUMP(70) T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1678 PC/SLOT/STEP:70/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1679 PC/SLOT/STEP:70/1/0 EI/EAM:0/0 Idepth:0 BZ(74) T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1680 PC/SLOT/STEP:74/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1681 PC/SLOT/STEP:74/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1682 PC/SLOT/STEP:74/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1683 PC/SLOT/STEP:74/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1684 PC/SLOT/STEP:74/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1685 PC/SLOT/STEP:74/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1686 PC/SLOT/STEP:74/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1687 PC/SLOT/STEP:75/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1688 PC/SLOT/STEP:75/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1689 PC/SLOT/STEP:75/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:65
+  [INFO] 1690 PC/SLOT/STEP:76/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1691 PC/SLOT/STEP:76/1/0 EI/EAM:0/0 Idepth:0 DUP T:83 Dst:[0] Rst:[25] AR:34 IO:65
+  [INFO] 1692 PC/SLOT/STEP:76/2/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1693 PC/SLOT/STEP:76/3/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1694 PC/SLOT/STEP:76/4/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1695 PC/SLOT/STEP:76/5/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1696 PC/SLOT/STEP:76/6/0 EI/EAM:0/0 Idepth:0 NOP T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1697 PC/SLOT/STEP:77/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1698 PC/SLOT/STEP:77/1/0 EI/EAM:0/0 Idepth:0 OUT(1) T:83 Dst:[0, 83] Rst:[25] AR:34 IO:65
+  [INFO] 1699 PC/SLOT/STEP:77/1/1 EI/EAM:0/0 Idepth:0 OUT(1) T:83 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] IO DEVICE 1 <- 83
+  [INFO] 1700 PC/SLOT/STEP:78/0/0 EI/EAM:0/0 Idepth:0 --- T:83 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1701 PC/SLOT/STEP:78/1/0 EI/EAM:0/0 Idepth:0 DROP T:83 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1702 PC/SLOT/STEP:78/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1703 PC/SLOT/STEP:78/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1704 PC/SLOT/STEP:78/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1705 PC/SLOT/STEP:78/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1706 PC/SLOT/STEP:78/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1707 PC/SLOT/STEP:79/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1708 PC/SLOT/STEP:79/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1709 PC/SLOT/STEP:80/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1710 PC/SLOT/STEP:80/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1711 PC/SLOT/STEP:80/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1712 PC/SLOT/STEP:81/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0, 1] Rst:[25] AR:35 IO:83
+  [INFO] 1713 PC/SLOT/STEP:81/1/0 EI/EAM:0/0 Idepth:0 ADD T:1 Dst:[0, 1] Rst:[25] AR:35 IO:83
+  [INFO] 1714 PC/SLOT/STEP:81/2/0 EI/EAM:0/0 Idepth:0 DUP T:2 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1715 PC/SLOT/STEP:81/3/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1716 PC/SLOT/STEP:81/4/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1717 PC/SLOT/STEP:81/5/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1718 PC/SLOT/STEP:81/6/0 EI/EAM:0/0 Idepth:0 NOP T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1719 PC/SLOT/STEP:82/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1720 PC/SLOT/STEP:82/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1721 PC/SLOT/STEP:82/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:2 Dst:[0, 2] Rst:[25] AR:35 IO:83
+  [INFO] 1722 PC/SLOT/STEP:83/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1723 PC/SLOT/STEP:83/1/0 EI/EAM:0/0 Idepth:0 DROP T:2 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1724 PC/SLOT/STEP:83/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1725 PC/SLOT/STEP:83/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1726 PC/SLOT/STEP:83/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1727 PC/SLOT/STEP:83/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1728 PC/SLOT/STEP:83/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1729 PC/SLOT/STEP:84/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1730 PC/SLOT/STEP:84/1/0 EI/EAM:0/0 Idepth:0 JUMP(56) T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1731 PC/SLOT/STEP:56/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1732 PC/SLOT/STEP:56/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1733 PC/SLOT/STEP:56/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:83
+  [INFO] 1734 PC/SLOT/STEP:57/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1735 PC/SLOT/STEP:57/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0] Rst:[25] AR:35 IO:83
+  [INFO] 1736 PC/SLOT/STEP:57/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:2 Dst:[0] Rst:[25] AR:33 IO:83
+  [INFO] 1737 PC/SLOT/STEP:58/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 2] Rst:[25] AR:33 IO:83
+  [INFO] 1738 PC/SLOT/STEP:58/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 2] Rst:[25] AR:33 IO:83
+  [INFO] 1739 PC/SLOT/STEP:58/2/0 EI/EAM:0/0 Idepth:0 LDI T:2 Dst:[0] Rst:[25] AR:33 IO:83
+  [INFO] 1740 PC/SLOT/STEP:58/2/1 EI/EAM:0/0 Idepth:0 LDI T:0 Dst:[] Rst:[25] AR:2 IO:83
+  [INFO] 1741 PC/SLOT/STEP:58/3/0 EI/EAM:0/0 Idepth:0 DUP T:84 Dst:[0] Rst:[25] AR:2 IO:83
+  [INFO] 1742 PC/SLOT/STEP:58/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:2 IO:83
+  [INFO] 1743 PC/SLOT/STEP:58/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:2 IO:83
+  [INFO] 1744 PC/SLOT/STEP:58/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:2 IO:83
+  [INFO] 1745 PC/SLOT/STEP:59/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0, 84] Rst:[25] AR:2 IO:83
+  [INFO] 1746 PC/SLOT/STEP:59/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:84 Dst:[0, 84] Rst:[25] AR:2 IO:83
+  [INFO] 1747 PC/SLOT/STEP:59/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1748 PC/SLOT/STEP:60/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1749 PC/SLOT/STEP:60/1/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1750 PC/SLOT/STEP:60/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1751 PC/SLOT/STEP:60/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1752 PC/SLOT/STEP:60/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1753 PC/SLOT/STEP:60/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1754 PC/SLOT/STEP:60/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1755 PC/SLOT/STEP:61/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1756 PC/SLOT/STEP:61/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1757 PC/SLOT/STEP:61/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1758 PC/SLOT/STEP:62/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1759 PC/SLOT/STEP:62/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1760 PC/SLOT/STEP:63/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1761 PC/SLOT/STEP:63/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1762 PC/SLOT/STEP:63/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1763 PC/SLOT/STEP:63/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1764 PC/SLOT/STEP:63/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1765 PC/SLOT/STEP:63/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1766 PC/SLOT/STEP:63/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1767 PC/SLOT/STEP:64/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1768 PC/SLOT/STEP:64/1/0 EI/EAM:0/0 Idepth:0 BZ(68) T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1769 PC/SLOT/STEP:65/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1770 PC/SLOT/STEP:65/1/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1771 PC/SLOT/STEP:65/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1772 PC/SLOT/STEP:65/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1773 PC/SLOT/STEP:65/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1774 PC/SLOT/STEP:65/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1775 PC/SLOT/STEP:65/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1776 PC/SLOT/STEP:66/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1777 PC/SLOT/STEP:66/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1778 PC/SLOT/STEP:67/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1779 PC/SLOT/STEP:67/1/0 EI/EAM:0/0 Idepth:0 JUMP(70) T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1780 PC/SLOT/STEP:70/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1781 PC/SLOT/STEP:70/1/0 EI/EAM:0/0 Idepth:0 BZ(74) T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1782 PC/SLOT/STEP:74/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1783 PC/SLOT/STEP:74/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1784 PC/SLOT/STEP:74/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1785 PC/SLOT/STEP:74/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1786 PC/SLOT/STEP:74/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1787 PC/SLOT/STEP:74/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1788 PC/SLOT/STEP:74/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1789 PC/SLOT/STEP:75/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1790 PC/SLOT/STEP:75/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1791 PC/SLOT/STEP:75/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:83
+  [INFO] 1792 PC/SLOT/STEP:76/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1793 PC/SLOT/STEP:76/1/0 EI/EAM:0/0 Idepth:0 DUP T:84 Dst:[0] Rst:[25] AR:34 IO:83
+  [INFO] 1794 PC/SLOT/STEP:76/2/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1795 PC/SLOT/STEP:76/3/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1796 PC/SLOT/STEP:76/4/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1797 PC/SLOT/STEP:76/5/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1798 PC/SLOT/STEP:76/6/0 EI/EAM:0/0 Idepth:0 NOP T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1799 PC/SLOT/STEP:77/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1800 PC/SLOT/STEP:77/1/0 EI/EAM:0/0 Idepth:0 OUT(1) T:84 Dst:[0, 84] Rst:[25] AR:34 IO:83
+  [INFO] 1801 PC/SLOT/STEP:77/1/1 EI/EAM:0/0 Idepth:0 OUT(1) T:84 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] IO DEVICE 1 <- 84
+  [INFO] 1802 PC/SLOT/STEP:78/0/0 EI/EAM:0/0 Idepth:0 --- T:84 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1803 PC/SLOT/STEP:78/1/0 EI/EAM:0/0 Idepth:0 DROP T:84 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1804 PC/SLOT/STEP:78/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1805 PC/SLOT/STEP:78/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1806 PC/SLOT/STEP:78/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1807 PC/SLOT/STEP:78/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1808 PC/SLOT/STEP:78/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1809 PC/SLOT/STEP:79/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1810 PC/SLOT/STEP:79/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1811 PC/SLOT/STEP:80/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1812 PC/SLOT/STEP:80/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1813 PC/SLOT/STEP:80/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:1 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1814 PC/SLOT/STEP:81/0/0 EI/EAM:0/0 Idepth:0 --- T:2 Dst:[0, 1] Rst:[25] AR:35 IO:84
+  [INFO] 1815 PC/SLOT/STEP:81/1/0 EI/EAM:0/0 Idepth:0 ADD T:2 Dst:[0, 1] Rst:[25] AR:35 IO:84
+  [INFO] 1816 PC/SLOT/STEP:81/2/0 EI/EAM:0/0 Idepth:0 DUP T:3 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1817 PC/SLOT/STEP:81/3/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1818 PC/SLOT/STEP:81/4/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1819 PC/SLOT/STEP:81/5/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1820 PC/SLOT/STEP:81/6/0 EI/EAM:0/0 Idepth:0 NOP T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1821 PC/SLOT/STEP:82/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1822 PC/SLOT/STEP:82/1/0 EI/EAM:0/0 Idepth:0 ST(35) T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1823 PC/SLOT/STEP:82/1/1 EI/EAM:0/0 Idepth:0 ST(35) T:3 Dst:[0, 3] Rst:[25] AR:35 IO:84
+  [INFO] 1824 PC/SLOT/STEP:83/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1825 PC/SLOT/STEP:83/1/0 EI/EAM:0/0 Idepth:0 DROP T:3 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1826 PC/SLOT/STEP:83/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1827 PC/SLOT/STEP:83/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1828 PC/SLOT/STEP:83/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1829 PC/SLOT/STEP:83/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1830 PC/SLOT/STEP:83/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1831 PC/SLOT/STEP:84/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1832 PC/SLOT/STEP:84/1/0 EI/EAM:0/0 Idepth:0 JUMP(56) T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1833 PC/SLOT/STEP:56/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1834 PC/SLOT/STEP:56/1/0 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1835 PC/SLOT/STEP:56/1/1 EI/EAM:0/0 Idepth:0 LD(35) T:0 Dst:[] Rst:[25] AR:35 IO:84
+  [INFO] 1836 PC/SLOT/STEP:57/0/0 EI/EAM:0/0 Idepth:0 --- T:3 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1837 PC/SLOT/STEP:57/1/0 EI/EAM:0/0 Idepth:0 LD(33) T:3 Dst:[0] Rst:[25] AR:35 IO:84
+  [INFO] 1838 PC/SLOT/STEP:57/1/1 EI/EAM:0/0 Idepth:0 LD(33) T:3 Dst:[0] Rst:[25] AR:33 IO:84
+  [INFO] 1839 PC/SLOT/STEP:58/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 3] Rst:[25] AR:33 IO:84
+  [INFO] 1840 PC/SLOT/STEP:58/1/0 EI/EAM:0/0 Idepth:0 ADD T:0 Dst:[0, 3] Rst:[25] AR:33 IO:84
+  [INFO] 1841 PC/SLOT/STEP:58/2/0 EI/EAM:0/0 Idepth:0 LDI T:3 Dst:[0] Rst:[25] AR:33 IO:84
+  [INFO] 1842 PC/SLOT/STEP:58/2/1 EI/EAM:0/0 Idepth:0 LDI T:0 Dst:[] Rst:[25] AR:3 IO:84
+  [INFO] 1843 PC/SLOT/STEP:58/3/0 EI/EAM:0/0 Idepth:0 DUP T:0 Dst:[0] Rst:[25] AR:3 IO:84
+  [INFO] 1844 PC/SLOT/STEP:58/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[25] AR:3 IO:84
+  [INFO] 1845 PC/SLOT/STEP:58/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[25] AR:3 IO:84
+  [INFO] 1846 PC/SLOT/STEP:58/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0, 0] Rst:[25] AR:3 IO:84
+  [INFO] 1847 PC/SLOT/STEP:59/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[25] AR:3 IO:84
+  [INFO] 1848 PC/SLOT/STEP:59/1/0 EI/EAM:0/0 Idepth:0 ST(34) T:0 Dst:[0, 0] Rst:[25] AR:3 IO:84
+  [INFO] 1849 PC/SLOT/STEP:59/1/1 EI/EAM:0/0 Idepth:0 ST(34) T:0 Dst:[0, 0] Rst:[25] AR:34 IO:84
+  [INFO] 1850 PC/SLOT/STEP:60/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1851 PC/SLOT/STEP:60/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1852 PC/SLOT/STEP:60/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1853 PC/SLOT/STEP:60/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1854 PC/SLOT/STEP:60/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1855 PC/SLOT/STEP:60/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1856 PC/SLOT/STEP:60/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1857 PC/SLOT/STEP:61/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1858 PC/SLOT/STEP:61/1/0 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1859 PC/SLOT/STEP:61/1/1 EI/EAM:0/0 Idepth:0 LD(34) T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1860 PC/SLOT/STEP:62/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1861 PC/SLOT/STEP:62/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1862 PC/SLOT/STEP:63/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0, 0] Rst:[25] AR:34 IO:84
+  [INFO] 1863 PC/SLOT/STEP:63/1/0 EI/EAM:0/0 Idepth:0 XOR T:0 Dst:[0, 0] Rst:[25] AR:34 IO:84
+  [INFO] 1864 PC/SLOT/STEP:63/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1865 PC/SLOT/STEP:63/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1866 PC/SLOT/STEP:63/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1867 PC/SLOT/STEP:63/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1868 PC/SLOT/STEP:63/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1869 PC/SLOT/STEP:64/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1870 PC/SLOT/STEP:64/1/0 EI/EAM:0/0 Idepth:0 BZ(68) T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1871 PC/SLOT/STEP:68/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1872 PC/SLOT/STEP:68/1/0 EI/EAM:0/0 Idepth:0 DROP T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1873 PC/SLOT/STEP:68/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1874 PC/SLOT/STEP:68/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1875 PC/SLOT/STEP:68/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1876 PC/SLOT/STEP:68/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1877 PC/SLOT/STEP:68/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1878 PC/SLOT/STEP:69/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1879 PC/SLOT/STEP:69/1/0 EI/EAM:0/0 Idepth:0 PUSH(1) T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1880 PC/SLOT/STEP:70/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1881 PC/SLOT/STEP:70/1/0 EI/EAM:0/0 Idepth:0 BZ(74) T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1882 PC/SLOT/STEP:71/0/0 EI/EAM:0/0 Idepth:0 --- T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1883 PC/SLOT/STEP:71/1/0 EI/EAM:0/0 Idepth:0 DROP T:1 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1884 PC/SLOT/STEP:71/2/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1885 PC/SLOT/STEP:71/3/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1886 PC/SLOT/STEP:71/4/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1887 PC/SLOT/STEP:71/5/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1888 PC/SLOT/STEP:71/6/0 EI/EAM:0/0 Idepth:0 NOP T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1889 PC/SLOT/STEP:72/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1890 PC/SLOT/STEP:72/1/0 EI/EAM:0/0 Idepth:0 PUSH(0) T:0 Dst:[] Rst:[25] AR:34 IO:84
+  [INFO] 1891 PC/SLOT/STEP:73/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1892 PC/SLOT/STEP:73/1/0 EI/EAM:0/0 Idepth:0 JUMP(85) T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1893 PC/SLOT/STEP:85/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1894 PC/SLOT/STEP:85/1/0 EI/EAM:0/0 Idepth:0 RET T:0 Dst:[0] Rst:[25] AR:34 IO:84
+  [INFO] 1895 PC/SLOT/STEP:25/0/0 EI/EAM:0/0 Idepth:0 --- T:0 Dst:[0] Rst:[] AR:34 IO:84
+  [INFO] 1896 PC/SLOT/STEP:25/1/0 EI/EAM:0/0 Idepth:0 HALT T:0 Dst:[0] Rst:[] AR:34 IO:84
+  IO1: [65(A), 83(S), 84(T)]
+  ticks: 1896
