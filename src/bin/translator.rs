@@ -176,7 +176,7 @@ impl Compiler {
 
                     match str_buf.parse::<i32>() {
                         Ok(num) => tokens.push(Token::Number(num)),
-                        Err(_) => panic!("Invalid number: {}", str_buf),
+                        Err(_) => panic!("Invalid number: {str_buf}"),
                     }
                 }
 
@@ -217,7 +217,7 @@ impl Compiler {
                     }
                     AstNode::List(items)
                 }
-                Token::RParen => panic!("Unexpected ) at {}", idx),
+                Token::RParen => panic!("Unexpected ) at {idx}"),
                 Token::Number(n) => {
                     *idx += 1;
                     AstNode::NumberLiteral(*n)
@@ -871,10 +871,10 @@ impl Compiler {
             let mut mnemonics = Vec::new();
             for slot in cw.slots.iter() {
                 match slot {
-                    Slot::Basic(instr) => mnemonics.push(format!("{:?}", instr).to_lowercase()),
+                    Slot::Basic(instr) => mnemonics.push(format!("{instr:?}").to_lowercase()),
                     Slot::Arg(instr, arg) => {
-                        let instr = format!("{:?}", instr).to_lowercase();
-                        mnemonics.push(format!("{} {}", instr, arg));
+                        let instr = format!("{instr:?}").to_lowercase();
+                        mnemonics.push(format!("{instr} {arg}"));
                     }
                 }
             }

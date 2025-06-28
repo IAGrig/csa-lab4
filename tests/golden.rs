@@ -76,7 +76,7 @@ fn run_golden_test(test_file: PathBuf) {
     let code_bin = test_utils::run_xxd(&out_code_bin_path);
     let data_bin = test_utils::run_xxd(&out_data_bin_path);
     let code_hex = test_utils::read_file_or_empty(&out_code_hex_path);
-    let result_bin = test_utils::run_xxd(&result_data_path);
+    let result_bin = test_utils::run_xxd(result_data_path);
     let truncated_log = test_utils::truncate_log(&stdout, log_limit as usize);
 
     let out_code = spec["out_code"].as_str().unwrap();

@@ -338,7 +338,7 @@ impl ControlUnit {
         self.stc_reg = 0;
     }
 
-    pub fn step(&mut self) -> bool {
+    pub fn process_tick(&mut self) -> bool {
         // returns true to continue, false to halt
 
         let slot = self.fetch_instruction();
@@ -662,20 +662,20 @@ impl ControlUnit {
                             // Printable ASCII range
                             let ch = num as u8 as char;
                             if ch.is_ascii_graphic() || ch == ' ' {
-                                format!("{}({})", num, ch)
+                                format!("{num}({ch})")
                             } else {
                                 // Control characters in ASCII range (like newlines, tabs)
-                                format!("{}({:?})", num, ch)
+                                format!("{num}({ch:?})")
                             }
                         } else {
                             // Non-ASCII or unprintable
-                            format!("{}(??)", num)
+                            format!("{num}(??)")
                         }
                     })
                     .collect::<Vec<String>>()
                     .join(", ");
 
-                format!("IO{}: [{}]", port_num, formatted_output)
+                format!("IO{port_num}: [{formatted_output}]")
             })
             .collect()
     }
@@ -731,7 +731,7 @@ impl IoDevice {
         if num_port == self.num_port {
             self.data = data;
             self.output_buffer.push(data);
-            info!("IO DEVICE {} <- {}", num_port, data);
+            info!("IO DEVICE {num_port} <- {data}");
         }
     }
 }
@@ -751,7 +751,7 @@ pub fn simulate(
     let mut cu = ControlUnit::new(prog, dp, io_devices);
 
     while cu.ticks() < tick_limit {
-        if !cu.step() {
+        if !cu.process_tick() {
             break;
         }
     }
@@ -790,8 +790,8 @@ fn main() -> io::Result<()> {
 
     let (output, ticks, data_memory) = simulate(program, data, input, tick_limit)?;
 
-    println!("{}", output);
-    println!("ticks: {}", ticks);
+    println!("{output}");
+    println!("ticks: {ticks}");
 
     let _ = dump_memory(data_memory, "result-data.bin");
 
@@ -804,11 +804,11 @@ fn format_stack(v: &Vec<i32>, n: usize) -> String {
     if len == 0 {
         "[]".to_string()
     } else if len <= n {
-        return format!("{:?}", v);
+        return format!("{v:?}");
     } else {
         let remaining_count = len - n;
         let last_n_elements = &v[len - n..];
-        return format!("[({})..., {:?}]", remaining_count, last_n_elements);
+        return format!("[({remaining_count})..., {last_n_elements:?}]");
     }
 }
 
@@ -845,7 +845,7 @@ fn parse_input_line(line: &str) -> Vec<(i32, i32)> {
                 if ch.len() == 1 {
                     ch.chars().next().unwrap() as i32
                 } else {
-                    panic!("Invalid character literal: {}", second);
+                    panic!("Invalid character literal: {second}");
                 }
             } else {
                 // number
