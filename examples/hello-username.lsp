@@ -1,0 +1,30 @@
+(defun isr1 ()
+  (disable-interrupts)
+  (setq last (store-byte (read-char 1) (+ buf i)))
+  (setq i (+ i 1))
+  (enable-interrupts))
+
+(defun print-string (addr i)
+  (if (setq c (load-byte (+ addr i)))
+    (progn
+      (write-char c 1)
+      (print-string addr (+ i 1)))
+    (write-char c 1)))
+
+(defun read-string ()
+    (enable-interrupts)
+    (if (and last (> size i))
+      (read-string)
+      (disable-interrupts)))
+
+(setq size 30)
+(setq buf (allocate 30))
+(setq i 0)
+(setq str1 "What is your name?")
+(print-string str1 0)
+
+(setq i 0)
+(setq last 1)
+(read-string)
+(print-string "Hello, " 0)
+(print-string buf 0)
